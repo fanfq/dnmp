@@ -9,10 +9,9 @@ ENV PHP_REDIS=4.0.2
 ADD https://php.codecasts.rocks/php-alpine.rsa.pub /etc/apk/keys/php-alpine.rsa.pub
 
 RUN apk --update add ca-certificates \
-    && echo "https://mirror.tuna.tsinghua.edu.cn/alpine/v3.7/main/" > /etc/apk/repositories \
-    && echo "https://mirror.tuna.tsinghua.edu.cn/alpine/v3.7/community/" >> /etc/apk/repositories \
-    && echo "@cast https://php.codecasts.rocks/v3.7/php-7.2" >> /etc/apk/repositories \
-    && echo "nameserver 8.8.8.8" >> /etc/resolv.conf && apk update && apk upgrade
+    && echo "@edge-main http://dl-cdn.alpinelinux.org/alpine/edge/main" >> /etc/apk/repositories \
+    && echo "@edge-community http://dl-cdn.alpinelinux.org/alpine/edge/community" >> /etc/apk/repositories \
+    && echo "@cast https://php.codecasts.rocks/v3.7/php-7.2" >> /etc/apk/repositories
 
 # install modules : GD iconv
 RUN apk update && apk add -U \
@@ -26,7 +25,6 @@ RUN apk update && apk add -U \
 RUN apk add -U \
     tini \
     php7@cast \
-    php7-cli@cast \
     php7-dev@cast \
     php7-pear@cast \
     php7-common@cast \
@@ -66,14 +64,12 @@ RUN apk add -U \
     curl curl-dev postgresql-dev \
     hiredis-dev libmcrypt-dev gmp-dev icu-dev linux-headers musl --virtual .phpize-deps $PHPIZE_DEPS \
     tzdata && \
-    ln -fs /usr/bin/php7 /usr/bin/php && \
-    rm -rf /var/cache/apk/ && mkdir /var/cache/apk && rm -rf /tmp/*
+    rm -rf /var/cache/apk/*
 
-ADD swoole /root/swoole-src/
-
-ADD build_swoole_so.sh /root/
-
-RUN sh /root/build_swoole_so.sh
+RUN apk add --no-cache --virtual .phpize-deps $PHPIZE_DEPS linux-headers && \
+    pecl install swoole && \
+    docker-php-ext-enable swoole && \
+    apk del .phpize-deps
 
 ADD rootfs /
 

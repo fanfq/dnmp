@@ -102,9 +102,7 @@ project                                                         根目录
 │   └── redis
 └── www                                                         web项目文件夹
     ├── ssl_test
-    │   ├── index.php
-    │   └── info.php
+    │   └── index.php
     └── test
-    │   ├── index.php
-    │   └── info.php
+        └── index.php
 ```
